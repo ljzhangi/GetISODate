@@ -18,12 +18,12 @@ public class GetISODateTime extends AbstractFunction {
     private static final Map<String, Integer> mapping = new HashMap<String, Integer>();
     static {
         desc.add("距离当前时间的数字");
-        desc.add("单位（years/months/days/hours/minutes/seconds）");
+        desc.add("单位（years/months/days(default)/hours/minutes/seconds）");
         desc.add("日期格式（option）");
     }
 
     // function的名称
-    private static final String KEY = "__getIOSDatetime";
+    private static final String KEY = "__getISODatetime";
 
     // 传入参数的值
     private Object[] values;
@@ -37,27 +37,27 @@ public class GetISODateTime extends AbstractFunction {
     public String execute(SampleResult sampleResult, Sampler sampler) throws InvalidVariableException {
         String datetime;
         String formatter;
+        if (field.length() == 0){
+            field = "days";
+        }
+
         if (format.length() == 0){
-            formatter = "yyyy-MM-DD HH:mm:ss.S";
+            formatter = "yyyy-MM-dd'T'HH:mm:ss.S";
         } else {
             formatter = format;
         }
 
-        Date date = new Date();
-
-        Calendar calendar = new GregorianCalendar();
+        Calendar calendar = Calendar.getInstance();
         mapping.put("years", Calendar.YEAR);
         mapping.put("months", Calendar.MONTH);
         mapping.put("days", Calendar.DATE);
         mapping.put("hours", Calendar.HOUR);
         mapping.put("minutes", Calendar.MINUTE);
         mapping.put("seconds", Calendar.SECOND);
-        calendar.setTime(date);
         calendar.add(mapping.get(field), (new Integer(delta)));
-        date = calendar.getTime();
+        Date date = calendar.getTime();
 
-        datetime = new SimpleDateFormat(formatter).format(date);
-        datetime = datetime.replaceFirst(" ", "T").concat("Z");
+        datetime = new SimpleDateFormat(formatter).format(date).concat("Z");
         return datetime;
     }
 
@@ -68,12 +68,14 @@ public class GetISODateTime extends AbstractFunction {
 
     @Override
     public void setParameters(Collection<CompoundVariable> parameters) throws InvalidVariableException {
-        checkParameterCount(parameters, 2, 3);
+        checkParameterCount(parameters, 1, 3);
         values = parameters.toArray();
 
         delta = ((CompoundVariable) values[0]).execute().trim();
 
-        field = ((CompoundVariable) values[1]).execute().trim();
+        if (values.length > 1) {
+            field = ((CompoundVariable) values[1]).execute().trim();
+        }
 
         if (values.length > 2) {
             format = ((CompoundVariable) values[2]).execute().trim();
