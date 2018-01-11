@@ -29,18 +29,21 @@ public class GetISODateTime extends AbstractFunction {
     private Object[] values;
     private String delta, field, format;
 
+    // 实现的function的描述
+    @Override
     public List<String> getArgumentDesc() {
         return desc;
     }
 
     @Override
     public String execute(SampleResult sampleResult, Sampler sampler) throws InvalidVariableException {
-        String datetime;
-        String formatter;
+        String datetime, formatter;
+
         if (field.length() == 0){
             field = "days";
         }
 
+        // 日期格式的默认值
         if (format.length() == 0){
             formatter = "yyyy-MM-dd'T'HH:mm:ss.S";
         } else {
